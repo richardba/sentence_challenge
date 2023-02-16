@@ -1,0 +1,79 @@
+<script>let globalEntities = []</script>
+<p id="notice"><%= notice %></p>
+
+<p>
+  <h3>Text:</h3>
+  <span class="sentence"><%= @sentence.text %></span>
+  <p>
+  <h4>Entities</h4>
+  <% @sentence.entities.each do |elem| %>
+    <script>globalEntities.push({text:'<%= elem.text %>',type:'<%= elem.etype %>',elemId:'<%=elem.text_to_hex%>'})</script>
+    <span class="etext a_<%=elem.text_to_hex%>" style="background-color:<%=elem.text_to_css%>; color:<%=elem.color_inverse%>"><%= elem.text %>
+    <span class="etype"><%= elem.etype %></span>
+    </span>
+  <% end %>
+  </p>
+</p>
+
+<h3>Display:</h3>
+<p id="show">
+  
+</p>
+<script>
+  if(globalEntities.length>0) {
+    const elem = document.getElementsByClassName('sentence')[0]
+    const textArray = elem.textContent.split(" ")
+    console.log(textArray)
+    let newTxt = document.getElementById('show')
+    textArray.forEach(item =>{
+      let flag = true
+      globalEntities.forEach(entity =>{
+        if(entity.text === item) {
+          const node = document.getElementsByClassName('a_'+entity.elemId)[0]
+          const clone = node.cloneNode(true)
+          console.log(newTxt)
+          newTxt.append(clone)
+          flag = false
+        }
+      })
+      if(flag) {
+        const span = document.createElement("span")
+        span.innerText = item
+        newTxt.append(span)
+      }
+    })
+  }
+</script>
+
+<%= link_to 'Edit', edit_sentence_path(@sentence) %> |
+<%= link_to 'Back', sentences_path %>
+<style>
+  .etext {
+    padding: 5px;
+    border-radius: 3px;
+    margin: 2px;
+  }
+
+  .etype {
+    font-weight: bold
+  }
+</style>
+<script async>
+  fetchEntities = async (url) => {
+    const response = await fetch(url)
+    const json = await response.json()
+
+    return await json    
+  }
+  const url = window.location.origin+'/entities.json'
+  fetchEntities(url).then(data => {
+    let entities = []
+    data.forEach(e => {
+      if(e.sentence_id == <%= @sentence.id %>) {
+        entities.push(e)
+      }
+    })
+  })
+
+
+</script>
